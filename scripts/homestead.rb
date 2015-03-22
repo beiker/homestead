@@ -82,14 +82,18 @@ class Homestead
 
     # Configure All Of The Configured Databases
     settings["databases"].each do |db|
-      config.vm.provision "shell" do |s|
-        s.path = "./scripts/create-mysql.sh"
-        s.args = [db]
-      end
-
-      config.vm.provision "shell" do |s|
-        s.path = "./scripts/create-postgres.sh"
-        s.args = [db]
+      if (db.has_key?("create") && db["create"])
+        if (db["to"] == "mysql")
+          config.vm.provision "shell" do |s|
+            s.path = "./scripts/create-mysql.sh"
+            s.args = [db["name"]]
+          end
+        else
+          config.vm.provision "shell" do |s|
+            s.path = "./scripts/create-postgres.sh"
+            s.args = [db["name"]]
+          end
+        end
       end
     end
 
@@ -113,9 +117,9 @@ class Homestead
     end
 
     # Update Composer On Every Provision
-    config.vm.provision "shell" do |s|
-      s.inline = "/usr/local/bin/composer self-update"
-    end
+    #config.vm.provision "shell" do |s|
+    #  s.inline = "/usr/local/bin/composer self-update"
+    #end
 
     # Configure Blackfire.io
     if settings.has_key?("blackfire")
